@@ -11,28 +11,32 @@ import projects.dao.DbConnection;
 import projects.exception.DbException;
 import projects.service.ProjectService;
 import projects.entity.Project;
+import projects.entity.Project;
 
 public class ProjectsApp {
 	private Scanner scanner = new Scanner(System.in);
 	private ProjectService projectService = new ProjectService();
+	private Project curProject;
 
 	//@formatter:off
 	private List<String> operations = List.of(
-			"1) Add a project"
+			"1) Add a project",
+			"2) List projects",
+			"3) Select a project"
 			);
-	//@formater:on
+	//@formatter:on
 /**
  * 
  * @param args
  */
 	public static void main(String[] args ) {
-		new ProjectsApp().processuserSelection();
+		new ProjectsApp().processUserSelection();
 	
 	}
 	/**
 	 * 
 	 */
-	private void processuserSelection() {
+	private void processUserSelection() {
 		boolean done = false;
 		while(!done) {
 			try {
@@ -40,11 +44,20 @@ public class ProjectsApp {
 			switch(operation) {
 			case -1:
 				done = exitMenu();
-				break;
+			break;
 		
 			case 1:
 				createProject();
-				break;	
+			break;
+				
+			case 2:
+				listProjects();
+			break;
+				
+			case 3:
+				selectProject();
+				
+			break;
 				default:
 					System.out.println("\n" + operation + " is not valid. Try again.");
 					break;
@@ -54,6 +67,18 @@ public class ProjectsApp {
 			}
 		}
 }
+	private void selectProject() {
+		listProjects();
+		Integer projectId = getIntInput("Enter a project ID to select a project");
+		curProject = null;
+		curProject = projectService.fetchProjectById(projectId);
+	}
+	private void listProjects() {
+		List<Project> projects = projectService.fetchAllProjects();
+		System.out.println("\nProjects:");
+		projects.forEach(project -> System.out.println("   "+project.getProjectId()+": "+project.getProjectName()));
+	}
+	
 	private void createProject() {
 		String projectName = getStringInput("Enter the project name");
 		BigDecimal estimatedHours = getDecimalInput("Enter the estimated hours");
@@ -107,7 +132,11 @@ public class ProjectsApp {
 		System.out.println("Here's what you can do:");
 		
 		operations.forEach(op -> System.out.println("   " + op));
-		
+		 if (Objects.isNull(curProject)) {
+		      System.out.println("\nYou are not working with a project.");
+		    } else {
+		      System.out.println("\nYou are working with project " + curProject);
+		    }
 	}
 
 /**
